@@ -3,6 +3,8 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
+const authRoutes = require("./routes/authRoutes");
+const articleRoutes = require("./routes/articleRoutes");
 
 const connectDB = require("./config/db");
 const healthRoutes = require("./routes/healthRoutes");
@@ -19,8 +21,11 @@ app.use(
 );
 
 app.use(express.json({ limit: "1mb" }));
+app.use("/api/auth", authRoutes);
 
 app.use("/api/health", healthRoutes);
+
+app.use("/api/articles", articleRoutes);
 
 const startServer = async () => {
   try {
