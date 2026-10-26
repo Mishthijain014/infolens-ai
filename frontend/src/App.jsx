@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Analyze from "./pages/Analyze";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
 
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/analyze" element={<Analyze />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

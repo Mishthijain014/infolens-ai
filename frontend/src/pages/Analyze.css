@@ -1,0 +1,150 @@
+
+.analyze-page {
+  min-height: 100vh;
+  background: #f6f9fd;
+  padding: 70px 24px;
+  color: #172033;
+}
+
+.analyze-container {
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.analyze-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.analyze-label {
+  display: inline-block;
+  color: #1769f5;
+  background: #e8f1ff;
+  border-radius: 30px;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 20px;
+}
+
+.analyze-header h1 {
+  font-size: clamp(30px, 4vw, 46px);
+  font-weight: 750;
+  letter-spacing: -1px;
+}
+
+.analyze-header p {
+  color: #667085;
+  font-size: 16px;
+}
+
+.analyze-form,
+.article-result {
+  background: #ffffff;
+  border: 1px solid #e4eaf2;
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 8px 30px rgba(24, 50, 90, 0.04);
+}
+
+.analyze-form label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.analyze-input-row {
+  display: flex;
+  gap: 12px;
+}
+
+.analyze-input-row input {
+  flex: 1;
+  min-width: 0;
+  padding: 14px 16px;
+  border: 1px solid #d9e2ed;
+  border-radius: 10px;
+  outline: none;
+}
+
+.analyze-input-row input:focus {
+  border-color: #1769f5;
+  box-shadow: 0 0 0 3px #1769f51a;
+}
+
+.analyze-input-row button {
+  border: none;
+  border-radius: 10px;
+  background: #1769f5;
+  color: white;
+  padding: 14px 24px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.analyze-input-row button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.analyze-error {
+  background: #fff0f0;
+  color: #b42318;
+  border: 1px solid #ffd5d5;
+  padding: 16px;
+  border-radius: 10px;
+  margin-top: 20px;
+}
+
+.article-result {
+  margin-top: 30px;
+}
+
+.article-result-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: #1769f5;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.article-result h2 {
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.article-result a {
+  color: #1769f5;
+}
+
+.article-text {
+  margin-top: 25px;
+  color: #475467;
+  line-height: 1.9;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 550px;
+  overflow-y: auto;
+}
+
+@media (max-width: 650px) {
+  .analyze-page {
+    padding: 40px 16px;
+  }
+
+  .analyze-form,
+  .article-result {
+    padding: 20px;
+  }
+
+  .analyze-input-row {
+    flex-direction: column;
+  }
+
+  .analyze-input-row button {
+    width: 100%;
+  }
+}
