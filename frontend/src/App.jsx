@@ -1,37 +1,25 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
-import "./App.css";
+
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import Dashboard from "./pages/Dashboard";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
-  const [status, setStatus] = useState("Checking...");
-  const [database, setDatabase] = useState("Checking...");
-
-  useEffect(() => {
-    axios
-      .get("http://localhost:5000/api/health")
-      .then((response) => {
-        setStatus(response.data.message);
-        setDatabase(response.data.database);
-      })
-      .catch(() => {
-        setStatus("Backend unavailable");
-        setDatabase("Disconnected");
-      });
-  }, []);
-
   return (
-    <main className="container py-5">
-      <h1>InfoLens</h1>
-      <p>MERN project setup verification</p>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
 
-      <div className="card p-4 mt-4">
-        <h2 className="h5">Backend status</h2>
-        <p>{status}</p>
+        <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+        </Route>
 
-        <h2 className="h5">Database status</h2>
-        <p>{database}</p>
-      </div>
-    </main>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
