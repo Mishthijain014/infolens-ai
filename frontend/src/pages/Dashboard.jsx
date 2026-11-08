@@ -47,6 +47,16 @@ function Dashboard() {
           <p className="text-secondary">
             Your InfoLens account is ready.
           </p>
+
+          <button
+            type="button"
+            className="btn btn-primary mt-3"
+            onClick={() => navigate("/analyze")}
+          >
+            Analyze Content
+          </button>
+
+
         </div>
       ) : (
         !error && <p className="mt-4">Loading profile...</p>
