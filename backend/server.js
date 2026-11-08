@@ -5,6 +5,7 @@ const cors = require("cors");
 const helmet = require("helmet");
 const authRoutes = require("./routes/authRoutes");
 const articleRoutes = require("./routes/articleRoutes");
+const summaryRoutes = require("./routes/summaryRoutes");
 
 const connectDB = require("./config/db");
 const healthRoutes = require("./routes/healthRoutes");
@@ -26,6 +27,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/health", healthRoutes);
 
 app.use("/api/articles", articleRoutes);
+app.use("/api/summaries", summaryRoutes);
 
 const startServer = async () => {
   try {
