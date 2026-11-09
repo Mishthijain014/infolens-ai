@@ -6,6 +6,7 @@ const helmet = require("helmet");
 const authRoutes = require("./routes/authRoutes");
 const articleRoutes = require("./routes/articleRoutes");
 const summaryRoutes = require("./routes/summaryRoutes");
+const insightsRoutes = require("./routes/insightsRoutes");
 
 const connectDB = require("./config/db");
 const healthRoutes = require("./routes/healthRoutes");
@@ -28,6 +29,7 @@ app.use("/api/health", healthRoutes);
 
 app.use("/api/articles", articleRoutes);
 app.use("/api/summaries", summaryRoutes);
+app.use("/api/insights", insightsRoutes);
 
 const startServer = async () => {
   try {
