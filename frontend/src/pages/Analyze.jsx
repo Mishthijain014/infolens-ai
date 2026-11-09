@@ -12,6 +12,14 @@ function Analyze() {
   const [extracting, setExtracting] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState("");
+  const [insights, setInsights] = useState("");
+const [insightsLoading, setInsightsLoading] = useState(false);
+const [insightsError, setInsightsError] = useState("");
+
+const [question, setQuestion] = useState("");
+const [qaHistory, setQaHistory] = useState([]);
+const [qaLoading, setQaLoading] = useState(false);
+const [qaError, setQaError] = useState("");
 
   const handleExtract = async (e) => {
     e.preventDefault();
@@ -20,6 +28,11 @@ function Analyze() {
     setArticle(null);
     setSummary(null);
     setExtracting(true);
+    setInsights("");
+setInsightsError("");
+setQuestion("");
+setQaHistory([]);
+setQaError("");
 
     try {
       const response = await api.post("/articles/extract", {
@@ -60,6 +73,66 @@ function Analyze() {
       setGenerating(false);
     }
   };
+
+  const handleGenerateInsights = async () => {
+  if (!article?.text) return;
+
+  setInsightsLoading(true);
+  setInsightsError("");
+  setInsights("");
+
+  try {
+    const response = await api.post("/insights/generate", {
+      text: article.text,
+    });
+
+    setInsights(response.data.data.insights);
+  } catch (error) {
+    setInsightsError(
+      error.response?.data?.message ||
+        "Unable to generate insights. Please try again."
+    );
+  } finally {
+    setInsightsLoading(false);
+  }
+};
+
+
+const handleAskQuestion = async (e) => {
+  e.preventDefault();
+
+  const currentQuestion = question.trim();
+
+  if (!article?.text || !currentQuestion || qaLoading) return;
+
+  setQaLoading(true);
+  setQaError("");
+  setQuestion("");
+
+  try {
+    const response = await api.post("/insights/ask", {
+      text: article.text,
+      question: currentQuestion,
+    });
+
+    const newQA = {
+      id: crypto.randomUUID(),
+      question: currentQuestion,
+      answer: response.data.data.answer,
+    };
+
+    setQaHistory((prev) => [...prev, newQA]);
+  } catch (error) {
+    setQuestion(currentQuestion);
+    setQaError(
+      error.response?.data?.message ||
+        "Unable to answer your question. Please try again."
+    );
+  } finally {
+    setQaLoading(false);
+  }
+};
+
 
   return (
     <main className="analyze-page">
@@ -190,6 +263,101 @@ function Analyze() {
             )}
           </section>
         )}
+
+        
+{article && (
+  <section className="insights-section">
+    <div className="insights-heading">
+      <h2>AI Insights</h2>
+      <p>
+        Discover key takeaways, important facts, and conclusions.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      className="insights-button"
+      onClick={handleGenerateInsights}
+      disabled={insightsLoading}
+    >
+      {insightsLoading ? "Generating Insights..." : "Generate Insights"}
+    </button>
+
+    {insightsError && (
+      <p className="insights-error" role="alert">
+        {insightsError}
+      </p>
+    )}
+
+    {insights && (
+      <div className="insights-result">
+        <h3>Generated Insights</h3>
+        <div className="insights-content">{insights}</div>
+      </div>
+    )}
+  </section>
+)}
+
+
+{article && (
+  <section className="qa-section">
+    <h2>Ask AI About This Article</h2>
+    <p>
+      Ask multiple questions and explore the article in detail.
+    </p>
+
+    {/* Previous questions and answers */}
+    {qaHistory.length > 0 && (
+      <div className="qa-history" aria-live="polite">
+        {qaHistory.map((item) => (
+          <div className="qa-conversation" key={item.id}>
+            <div className="qa-question">
+              <span className="qa-label">You asked</span>
+              <p>{item.question}</p>
+            </div>
+
+            <div className="qa-answer">
+              <span className="qa-label">InfoLens AI</span>
+              <p>{item.answer}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+
+    {/* Input for next question */}
+    <form onSubmit={handleAskQuestion}>
+      <label htmlFor="article-question">
+        Ask another question
+      </label>
+
+      <textarea
+        id="article-question"
+        value={question}
+        onChange={(e) => setQuestion(e.target.value)}
+        placeholder="Type your next question here..."
+        maxLength={500}
+        rows={3}
+        required
+      />
+
+      <button
+        type="submit"
+        disabled={qaLoading || !question.trim()}
+      >
+        {qaLoading ? "Finding Answer..." : "Ask Question"}
+      </button>
+    </form>
+
+    {qaError && (
+      <p className="qa-error" role="alert">
+        {qaError}
+      </p>
+    )}
+  </section>
+)}
+
+
       </div>
     </main>
   );
