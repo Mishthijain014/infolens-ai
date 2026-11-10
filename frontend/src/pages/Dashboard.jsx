@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import "./Dashboard.css";
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -55,6 +56,14 @@ function Dashboard() {
           >
             Analyze Content
           </button>
+          <button
+  type="button"
+  onClick={() => navigate("/history")}
+  className="dashboard-history-btn"
+>
+  My History
+</button>
+
 
 
         </div>
