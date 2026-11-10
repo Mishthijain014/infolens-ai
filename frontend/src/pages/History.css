@@ -87,16 +87,19 @@
   margin-bottom: 12px;
 }
 
+
 .history-summary {
   color: #64748b;
   font-size: 14px;
   line-height: 1.7;
   display: -webkit-box;
   -webkit-box-orient: vertical;
+  line-clamp: 4;
   -webkit-line-clamp: 4;
   overflow: hidden;
   min-height: 90px;
 }
+
 
 .history-actions {
   display: flex;
