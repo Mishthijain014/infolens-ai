@@ -319,3 +319,46 @@
     max-width: 95%;
   }
 }
+
+
+.save-analysis-section {
+  margin-top: 28px;
+  padding: 28px;
+  background: #ffffff;
+  border: 1px solid #dbeafe;
+  border-radius: 16px;
+}
+
+.save-analysis-section h2 {
+  color: #17325d;
+  margin-bottom: 10px;
+}
+
+.save-analysis-section p {
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.save-analysis-button {
+  margin-top: 16px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 10px;
+  background: #2563eb;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.save-analysis-button:hover {
+  background: #1d4ed8;
+}
+
+.save-analysis-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.save-analysis-message {
+  margin-top: 12px;
+}

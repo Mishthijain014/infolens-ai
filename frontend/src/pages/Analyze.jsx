@@ -21,8 +21,14 @@ const [qaHistory, setQaHistory] = useState([]);
 const [qaLoading, setQaLoading] = useState(false);
 const [qaError, setQaError] = useState("");
 
+const [saving, setSaving] = useState(false);
+const [saveMessage, setSaveMessage] = useState("");
+const [savedAnalysisId, setSavedAnalysisId] = useState(null);
+
   const handleExtract = async (e) => {
     e.preventDefault();
+    setSavedAnalysisId(null);
+setSaveMessage("");
 
     setError("");
     setArticle(null);
@@ -122,6 +128,7 @@ const handleAskQuestion = async (e) => {
     };
 
     setQaHistory((prev) => [...prev, newQA]);
+    setSaveMessage("");
   } catch (error) {
     setQuestion(currentQuestion);
     setQaError(
@@ -132,6 +139,59 @@ const handleAskQuestion = async (e) => {
     setQaLoading(false);
   }
 };
+
+
+const handleSaveAnalysis = async () => {
+  if (!article?.text || !summary) {
+    setSaveMessage("Please extract an article and generate a summary first.");
+    return;
+  }
+
+  setSaving(true);
+  setSaveMessage("");
+
+  try {
+    const payload = {
+  title: article.title || "Untitled Article",
+  sourceUrl: article.url || article.sourceUrl || url.trim(),
+  extractedText: article.text,
+  summary: summary.summary,
+  summaryType: summary.summaryType || summaryType,
+  insights,
+  qaHistory: qaHistory.map(({ question, answer }) => ({
+    question,
+    answer,
+  })),
+};
+
+    const response = savedAnalysisId
+      ? await api.patch(`/analyses/${savedAnalysisId}`, {
+          summary: payload.summary,
+          summaryType: payload.summaryType,
+          insights: payload.insights,
+          qaHistory: payload.qaHistory,
+        })
+      : await api.post("/analyses", payload);
+
+    if (!savedAnalysisId) {
+      setSavedAnalysisId(response.data.data._id);
+    }
+
+    setSaveMessage(
+      savedAnalysisId
+        ? "Analysis updated successfully!"
+        : "Analysis saved successfully!"
+    );
+  } catch (error) {
+    setSaveMessage(
+      error.response?.data?.message ||
+        "Unable to save analysis. Please try again."
+    );
+  } finally {
+    setSaving(false);
+  }
+};
+
 
 
   return (
@@ -356,6 +416,36 @@ const handleAskQuestion = async (e) => {
     )}
   </section>
 )}
+
+
+{article && summary && (
+  <section className="save-analysis-section">
+    <h2>Save Your Analysis</h2>
+    <p>
+      Save your summary, insights, and questions to access them later.
+    </p>
+
+    <button
+      type="button"
+      onClick={handleSaveAnalysis}
+      disabled={saving}
+      className="save-analysis-button"
+    >
+      {saving
+        ? "Saving..."
+        : savedAnalysisId
+        ? "Update Saved Analysis"
+        : "Save Analysis"}
+    </button>
+
+    {saveMessage && (
+      <p className="save-analysis-message" role="status">
+        {saveMessage}
+      </p>
+    )}
+  </section>
+)}
+
 
 
       </div>
