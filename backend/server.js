@@ -8,6 +8,7 @@ const articleRoutes = require("./routes/articleRoutes");
 const summaryRoutes = require("./routes/summaryRoutes");
 const insightsRoutes = require("./routes/insightsRoutes");
 const analysisRoutes = require("./routes/analysisRoutes");
+const fileRoutes = require("./routes/fileRoutes");
 
 const connectDB = require("./config/db");
 const healthRoutes = require("./routes/healthRoutes");
@@ -33,6 +34,35 @@ app.use("/api/summaries", summaryRoutes);
 app.use("/api/insights", insightsRoutes);
 
 app.use("/api/analyses", analysisRoutes);
+
+app.use("/api/files", fileRoutes);
+
+
+const multer = require("multer");
+
+app.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    return res.status(400).json({
+      success: false,
+      message:
+        err.code === "LIMIT_FILE_SIZE"
+          ? "File size must not exceed 10 MB."
+          : err.message,
+    });
+  }
+
+  if (err) {
+    console.error("Upload error:", err.message);
+
+    return res.status(400).json({
+      success: false,
+      message: err.message || "File upload failed.",
+    });
+  }
+
+  next();
+});
+
 
 const startServer = async () => {
   try {

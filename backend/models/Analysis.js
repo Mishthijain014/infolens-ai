@@ -35,8 +35,8 @@ const analysisSchema = new mongoose.Schema(
 
     sourceUrl: {
       type: String,
-      required: true,
       trim: true,
+      default: "",
     },
 
     sourceType: {

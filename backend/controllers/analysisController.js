@@ -3,11 +3,13 @@ const mongoose = require("mongoose");
 const Analysis = require("../models/Analysis");
 
 // 1. Save a new analysis
+
 const saveAnalysis = async (req, res) => {
   try {
     const {
       title,
-      sourceUrl,
+      sourceType = "article",
+      sourceUrl = "",
       extractedText,
       summary,
       summaryType,
@@ -15,26 +17,46 @@ const saveAnalysis = async (req, res) => {
       qaHistory,
     } = req.body;
 
+    // Validate supported content sources
+    if (!["article", "file"].includes(sourceType)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid content source type.",
+      });
+    }
+
+    // Validate common required fields
     if (
       typeof title !== "string" ||
       !title.trim() ||
-      typeof sourceUrl !== "string" ||
-      !/^https?:\/\/\S+$/i.test(sourceUrl) ||
       typeof extractedText !== "string" ||
       !extractedText.trim()
     ) {
       return res.status(400).json({
         success: false,
-        message: "Valid title, source URL and extracted text are required.",
+        message: "Valid title and extracted text are required.",
       });
     }
 
+    // Article sources must have a valid URL
+    if (
+      sourceType === "article" &&
+      (typeof sourceUrl !== "string" ||
+        !/^https?:\/\/\S+$/i.test(sourceUrl))
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "A valid source URL is required for articles.",
+      });
+    }
+
+    // Uploaded files do not require a URL
     const analysis = await Analysis.create({
       user: req.user._id,
-      title,
-      sourceUrl,
-      sourceType: "article",
-      extractedText,
+      title: title.trim(),
+      sourceType,
+      sourceUrl: sourceType === "file" ? "" : sourceUrl,
+      extractedText: extractedText.trim(),
       summary,
       summaryType,
       insights,
@@ -55,6 +77,7 @@ const saveAnalysis = async (req, res) => {
     });
   }
 };
+
 
 // 2. Get logged-in user's analysis history
 const getMyAnalyses = async (req, res) => {
