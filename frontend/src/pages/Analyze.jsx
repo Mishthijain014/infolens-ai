@@ -5,6 +5,8 @@ import "./Analyze.css";
 
 function Analyze() {
   const [url, setUrl] = useState("");
+  const [inputMode, setInputMode] = useState("url");
+  const [selectedFile, setSelectedFile] = useState(null);
   const [article, setArticle] = useState(null);
   const [summaryType, setSummaryType] = useState("short");
   const [summary, setSummary] = useState(null);
@@ -55,6 +57,69 @@ setQaError("");
       setExtracting(false);
     }
   };
+
+
+const handleFileExtract = async (e) => {
+  e.preventDefault();
+
+  if (!selectedFile) {
+    setError("Please select a file first.");
+    return;
+  }
+
+  if (selectedFile.size > 10 * 1024 * 1024) {
+    setError("File size must not exceed 10 MB.");
+    return;
+  }
+
+  const allowedExtensions = [".pdf", ".docx", ".txt"];
+  const extension = selectedFile.name
+    .slice(selectedFile.name.lastIndexOf("."))
+    .toLowerCase();
+
+  if (!allowedExtensions.includes(extension)) {
+    setError("Only PDF, DOCX and TXT files are allowed.");
+    return;
+  }
+
+  setError("");
+  setArticle(null);
+  setSummary(null);
+  setInsights("");
+  setInsightsError("");
+  setQuestion("");
+  setQaHistory([]);
+  setQaError("");
+  setSavedAnalysisId(null);
+  setSaveMessage("");
+  setExtracting(true);
+
+  try {
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+
+    const response = await api.post("/files/extract", formData);
+
+    const extracted = response.data.data;
+
+    setArticle({
+      title: extracted.fileName,
+      text: extracted.text,
+      wordCount: extracted.wordCount,
+      url: "",
+      sourceType: "file",
+      fileType: extracted.fileType,
+    });
+  } catch (err) {
+    setError(
+      err.response?.data?.message ||
+        "Unable to extract file. Please try again."
+    );
+  } finally {
+    setExtracting(false);
+  }
+};
+
 
   const handleGenerateSummary = async () => {
     if (!article?.text) return;
@@ -151,9 +216,15 @@ const handleSaveAnalysis = async () => {
   setSaveMessage("");
 
   try {
-    const payload = {
-  title: article.title || "Untitled Article",
-  sourceUrl: article.url || article.sourceUrl || url.trim(),
+    
+const isFile = article.sourceType === "file";
+
+const payload = {
+  title: article.title || "Untitled Content",
+  sourceType: isFile ? "file" : "article",
+  sourceUrl: isFile
+    ? ""
+    : article.url || article.sourceUrl || url.trim(),
   extractedText: article.text,
   summary: summary.summary,
   summaryType: summary.summaryType || summaryType,
@@ -163,6 +234,7 @@ const handleSaveAnalysis = async () => {
     answer,
   })),
 };
+
 
     const response = savedAnalysisId
       ? await api.patch(`/analyses/${savedAnalysisId}`, {
@@ -205,24 +277,90 @@ const handleSaveAnalysis = async () => {
           </p>
         </div>
 
-        <form className="analyze-form" onSubmit={handleExtract}>
-          <label htmlFor="article-url">Article URL</label>
+        
+<div className="input-mode-toggle">
+  <button
+    type="button"
+    className={inputMode === "url" ? "active" : ""}
+    onClick={() => {
+      setInputMode("url");
+      setError("");
+    }}
+    disabled={extracting}
+  >
+    Article URL
+  </button>
 
-          <div className="analyze-input-row">
-            <input
-              id="article-url"
-              type="url"
-              placeholder="https://example.com/article"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              required
-            />
+  <button
+    type="button"
+    className={inputMode === "file" ? "active" : ""}
+    onClick={() => {
+      setInputMode("file");
+      setError("");
+    }}
+    disabled={extracting}
+  >
+    Upload File
+  </button>
+</div>
 
-            <button type="submit" disabled={extracting || generating}>
-              {extracting ? "Extracting..." : "Extract Article"}
-            </button>
-          </div>
-        </form>
+{inputMode === "url" ? (
+  <form className="analyze-form" onSubmit={handleExtract}>
+    <label htmlFor="article-url">Article URL</label>
+
+    <div className="analyze-input-row">
+      <input
+        id="article-url"
+        type="url"
+        placeholder="https://example.com/article"
+        value={url}
+        onChange={(e) => setUrl(e.target.value)}
+        required
+      />
+
+      <button
+        type="submit"
+        disabled={extracting || generating}
+      >
+        {extracting ? "Extracting..." : "Extract Article"}
+      </button>
+    </div>
+  </form>
+) : (
+  <form className="analyze-form" onSubmit={handleFileExtract}>
+    <label htmlFor="content-file">Upload Document</label>
+
+    <div className="file-upload-area">
+      <input
+        id="content-file"
+        type="file"
+        accept=".pdf,.docx,.txt"
+        onChange={(e) => {
+          setSelectedFile(e.target.files?.[0] || null);
+          setError("");
+        }}
+      />
+
+      <p>Supported formats: PDF, DOCX, TXT</p>
+      <p>Maximum file size: 10 MB</p>
+
+      {selectedFile && (
+        <div className="selected-file">
+          Selected: {selectedFile.name}
+        </div>
+      )}
+    </div>
+
+    <button
+      type="submit"
+      className="extract-file-btn"
+      disabled={!selectedFile || extracting || generating}
+    >
+      {extracting ? "Extracting File..." : "Extract File"}
+    </button>
+  </form>
+)}
+
 
         {error && (
           <div className="analyze-error" role="alert">
@@ -240,13 +378,15 @@ const handleSaveAnalysis = async () => {
 
               <h2>{article.title}</h2>
 
-              <a
-                href={article.url}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                View original article
-              </a>
+              {article.url && (
+  <a
+    href={article.url}
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    View original article
+  </a>
+)}
 
               <div className="article-text">{article.text}</div>
             </section>
